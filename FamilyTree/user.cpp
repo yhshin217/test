@@ -162,9 +162,11 @@ void change(char name[MAX_NAME_LENGTH], char bfName[MAX_NAME_LENGTH]){
 void registeration(char parent[MAX_NAME_LENGTH], char child[MAX_NAME_LENGTH], char childBfName[MAX_NAME_LENGTH]){
 	ENTRY* entry = getHash(parent);
 	ENTRY* childNode = getNode();
+	entry->childNo++;
+	
+	childNode->parent = entry;
 	childNode->nameLen = strcpy(child, childNode->name);
 	childNode->bfnameLen = strcpy(childBfName, childNode->bfname);
-	childNode->childNo++;
 
 	addHash(childNode);
 
