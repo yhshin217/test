@@ -26,12 +26,13 @@ ENTRY* hashTable[HASHTABLE];
 ENTRY* root;
 int count=0;
 char* mPtr;
+int tSize;
 
 int strcpy(char* src, char* dst)
 {
 	int ret = 0;
-	while (*src != 0){
-		*dst++ = *src++;
+	while (*dst != 0){
+		*src++ = *dst++;
 		ret++;
 	}
 	return ret;
@@ -146,27 +147,23 @@ void parseDFS(ENTRY* node)
 
 void parse(char orgFamilyTree[MAX_FAMILY_TREE_LENGTH], int size) {
 	count = 0;
-	for (int i = 0; i < HASHTABLE ; i++)
-		hashTable[i] = 0;
 	root = getNode();
 	mPtr = orgFamilyTree;
+	tSize = size;
 	parseDFS(root);
 }
 
 void change(char name[MAX_NAME_LENGTH], char bfName[MAX_NAME_LENGTH]){
 	ENTRY* entry = getHash(name);
-	entry->bfnameLen = strcpy(bfName, entry->bfname);
-	entry->bfname[entry->bfnameLen] = 0;
+	entry->nameLen = strcpy(bfName, entry->name);
 }
 
 void registeration(char parent[MAX_NAME_LENGTH], char child[MAX_NAME_LENGTH], char childBfName[MAX_NAME_LENGTH]){
 	ENTRY* entry = getHash(parent);
 	ENTRY* childNode = getNode();
-	entry->childNo++;
-	
-	childNode->parent = entry;
 	childNode->nameLen = strcpy(child, childNode->name);
 	childNode->bfnameLen = strcpy(childBfName, childNode->bfname);
+	childNode->childNo++;
 
 	addHash(childNode);
 
@@ -193,33 +190,34 @@ void remove(char name[MAX_NAME_LENGTH]){
 	}
 }
 
-char* treeFtr;
+int retFamily;
+char* retPtr;
 
 void makeTree(ENTRY* entry)
 {
 	if ((entry->firstChild == 0) && (entry->lastChild == 0)) {
-		*treeFtr++ = 1;
+		*retPtr++ = 1;
 	}
 	else {
-		*treeFtr++ = 2;
+		*retPtr++ = 2;
 	}
-	*treeFtr++ = 0;
-	*treeFtr++ = entry->nameLen;
-	strcpy(entry->name, treeFtr);
-	treeFtr += entry->nameLen;
+	retPtr++;
+	*retPtr++ = entry->nameLen;
+	strcpy(entry->name, retPtr);
+	retPtr += entry->nameLen;
 
 	if ((entry->firstChild == 0) && (entry->lastChild == 0)) {
-		*treeFtr++ = 0;
-		*treeFtr++ = entry->bfnameLen;
-		strcpy(entry->bfname, treeFtr);
-		treeFtr += entry->bfnameLen;
+		retPtr++;
+		*retPtr++ = entry->bfnameLen;
+		strcpy(entry->bfname, retPtr);
+		retPtr += entry->bfnameLen;
 	}
 	else {
-		*treeFtr++ = 0;
-		*treeFtr++ = entry->childNo;
+		retPtr++;
+		*retPtr++ = entry->childNo;
 		ENTRY* child = entry->firstChild;
 		for (int i = 0 ; i < entry->childNo ; i++) {
-			makeTree(child, ftr);
+			makeTree(child);
 			child = child->nextSibling;
 		}
 	}
@@ -227,9 +225,9 @@ void makeTree(ENTRY* entry)
 
 int familyTree(char name[MAX_NAME_LENGTH], char newFamilyTree[MAX_FAMILY_TREE_LENGTH]) {
 	ENTRY* entry = getHash(name);
-	treeFtr = newFamilyTree;
+	retPtr = newFamilyTree;
 
 	makeTree(entry);
 
-	return (treeFtr - newFamilyTree);
+	return (retPtr - newFamilyTree);
 }
